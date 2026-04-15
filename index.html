@@ -170,6 +170,41 @@
       border-radius: 10px;
       text-transform: uppercase;
     }
+
+    .pause-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 36px;
+      height: 36px;
+      background: rgba(15, 52, 96, 0.85);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .pause-btn .bar {
+      width: 4px;
+      height: 14px;
+      background: #4ecca3;
+      border-radius: 2px;
+    }
+
+    .pause-btn.paused .bar:first-child {
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+      width: 14px;
+      height: 14px;
+      background: #4ecca3;
+    }
+
+    .pause-btn.paused .bar:last-child {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -194,6 +229,11 @@
       <span id="levelBannerText"></span>
     </div>
 
+    <button class="pause-btn" id="pauseBtn" onclick="togglePause()">
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </button>
+
     <div class="overlay" id="overlay">
       <h2>AKSHAY'S SNAKE</h2>
       <p>Swipe or use arrow keys</p>
@@ -212,6 +252,7 @@
     const levelBadge = document.getElementById('levelBadge');
     const levelBanner = document.getElementById('levelBanner');
     const levelBannerText = document.getElementById('levelBannerText');
+    const pauseBtn = document.getElementById('pauseBtn');
 
     // Responsive canvas
     function resizeCanvas() {
@@ -309,6 +350,8 @@
       scoreEl.textContent = 0;
       levelBadge.textContent = 'Level 1';
       overlay.style.display = 'none';
+      pauseBtn.style.display = 'flex';
+      pauseBtn.classList.remove('paused');
       placeFood();
       clearInterval(loop);
       loop = setInterval(tick, LEVELS[0].speed);
@@ -424,9 +467,16 @@
       });
     }
 
+    function togglePause() {
+      if (!running) return;
+      paused = !paused;
+      pauseBtn.classList.toggle('paused', paused);
+    }
+
     function gameOver() {
       clearInterval(loop);
       running = false;
+      pauseBtn.style.display = 'none';
       const cfg = getLevelConfig(score);
       overlay.innerHTML = `
         <h2>GAME OVER</h2>
@@ -445,7 +495,7 @@
         case 'ArrowDown':  if (dir.y !== -1) nextDir = { x: 0, y: 1 };  break;
         case 'ArrowLeft':  if (dir.x !== 1)  nextDir = { x: -1, y: 0 }; break;
         case 'ArrowRight': if (dir.x !== -1) nextDir = { x: 1, y: 0 };  break;
-        case 'p': case 'P': if (running) paused = !paused; break;
+        case 'p': case 'P': togglePause(); break;
       }
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
     });
